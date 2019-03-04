@@ -15,10 +15,10 @@ SOFA::~SOFA()
     mysofa_close(hrtf);
 }
 
-vector<short> SOFA::get_hrtf(float x, float y, float z)
+vector<float> SOFA::get_hrtf(float x, float y, float z)
 {
-    vector<short> ret(size_t(filter_len * 2));
-    int _;
-    mysofa_getfilter_short(hrtf, x, y, z, ret.data(), ret.data() + filter_len, &_, &_);
+    vector<float> ret(size_t(filter_len * 2));
+    float _;
+    mysofa_getfilter_float(hrtf, x, y, z, ret.data(), ret.data() + filter_len, &_, &_);
     return ret;
 }

@@ -9,7 +9,7 @@ class SOFA {
 public:
     SOFA(const std::string &filename, float sample_rate);
     ~SOFA();
-    std::vector<short> get_hrtf(float x, float y, float z);
+    std::vector<float> get_hrtf(float x, float y, float z);
 private:
     MYSOFA_EASY *hrtf;
     int filter_len;

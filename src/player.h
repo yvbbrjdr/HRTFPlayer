@@ -21,10 +21,11 @@ private:
     SOFA *sofa;
     HSTREAM handle;
     float x, y, z;
+    std::vector<double> prev;
     static bool inited;
     static void init();
     static void CALLBACK DSP(HDSP, DWORD, void *buffer, DWORD length, void *user);
-    void DSP(void *buffer, DWORD length);
+    void DSP(short *buffer, DWORD length);
 };
 
 #endif // PLAYER_H

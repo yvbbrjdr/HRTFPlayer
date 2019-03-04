@@ -1,4 +1,5 @@
 #include "player.h"
+#include <climits>
 #include <stdexcept>
 #include "utils.h"
 using namespace std;
@@ -69,15 +70,29 @@ void Player::init()
 
 void CALLBACK Player::DSP(HDSP, DWORD, void *buffer, DWORD length, void *user)
 {
-    reinterpret_cast<Player *>(user)->DSP(buffer, length);
+    reinterpret_cast<Player *>(user)->DSP(reinterpret_cast<short *>(buffer), length / sizeof(short));
 }
 
-void Player::DSP(void *buffer, DWORD length)
+void Player::DSP(short *buffer, DWORD length)
 {
     if (sofa == nullptr)
         return;
-    short *s = reinterpret_cast<short *>(buffer);
-    vector<double> a;
-    for (DWORD i = 0; i < length / 2; i += 2)
-        s[i] = s[i + 1] = (s[i] + s[i + 1]) / 2;
+    vector<float> hrtf = sofa->get_hrtf(x, y, z);
+    if (prev.empty())
+        prev.resize(hrtf.size() / 2 - 1);
+    vector<double> a(prev), b1, b2;
+    for (DWORD i = 0; i < length; i += 2)
+        a.emplace_back((buffer[i] + buffer[i + 1]) / 2.0);
+    for (size_t i = 0; i < prev.size(); ++i)
+        prev[i] = a[a.size() - prev.size() + i];
+    for (size_t i = 0; i < hrtf.size() / 2; ++i)
+        b1.emplace_back(hrtf[i]);
+    b1 = FFT_conv(a, b1);
+    for (size_t i = hrtf.size() / 2; i < hrtf.size(); ++i)
+        b2.emplace_back(hrtf[i]);
+    b2 = FFT_conv(a, b2);
+    for (DWORD i = 0; i < length; i += 2) {
+        buffer[i] = short(b1[i + prev.size()]);
+        buffer[i + 1] = short(b2[i + prev.size()]);
+    }
 }
