@@ -12,14 +12,22 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     widget.cpp \
-    utils.cpp
+    utils.cpp \
+    sofa.cpp \
+    player.cpp
 
 HEADERS += \
     widget.h \
-    utils.h
+    utils.h \
+    sofa.h \
+    player.h
 
 FORMS += \
     widget.ui
+
+LIBS += \
+    -lmysofa \
+    -lbass
 
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
