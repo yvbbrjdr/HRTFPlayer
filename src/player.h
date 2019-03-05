@@ -14,6 +14,9 @@ public:
     void pause();
     void stop();
     void set_source(float x, float y, float z);
+    double get_length();
+    double get_position();
+    void set_position(double pos);
 private:
     enum {
         SAMPLE_RATE = 44100

@@ -31,14 +31,17 @@ void Player::open(const std::string &filename)
 
 void Player::open_hrtf(const std::string &filename)
 {
-    if (sofa != nullptr)
-        delete sofa;
-    sofa = nullptr;
+    if (sofa != nullptr) {
+        SOFA *tmp = sofa;
+        sofa = nullptr;
+        delete tmp;
+    }
     sofa = new SOFA(filename, SAMPLE_RATE);
 }
 
 void Player::play()
 {
+    prev.clear();
     BASS_ChannelPlay(handle, FALSE);
 }
 
@@ -50,6 +53,7 @@ void Player::pause()
 void Player::stop()
 {
     BASS_ChannelStop(handle);
+    set_position(0);
 }
 
 void Player::set_source(float x, float y, float z)
@@ -59,11 +63,33 @@ void Player::set_source(float x, float y, float z)
     this->z = z;
 }
 
+double Player::get_length()
+{
+    if (handle == 0)
+        return 1;
+    return BASS_ChannelBytes2Seconds(handle, BASS_ChannelGetLength(handle, BASS_POS_BYTE));
+}
+
+double Player::get_position()
+{
+    if (handle == 0)
+        return 0;
+    return BASS_ChannelBytes2Seconds(handle, BASS_ChannelGetPosition(handle, BASS_POS_BYTE));
+}
+
+void Player::set_position(double pos)
+{
+    if (handle == 0)
+        return;
+    BASS_ChannelSetPosition(handle, BASS_ChannelSeconds2Bytes(handle, pos), BASS_POS_BYTE);
+}
+
 void Player::init()
 {
     if (!inited) {
         if (BASS_Init(-1, SAMPLE_RATE, 0, nullptr, nullptr) == FALSE)
             throw runtime_error("bass init failed");
+        BASS_SetConfig(BASS_CONFIG_BUFFER, 200);
         inited = true;
     }
 }
