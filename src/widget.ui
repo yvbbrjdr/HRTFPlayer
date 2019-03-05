@@ -66,6 +66,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="recordButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Record</string>
            </property>

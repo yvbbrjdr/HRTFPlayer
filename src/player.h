@@ -17,6 +17,7 @@ public:
     double get_length();
     double get_position();
     void set_position(double pos);
+    void set_record(const std::string &filename);
 private:
     enum {
         SAMPLE_RATE = 44100

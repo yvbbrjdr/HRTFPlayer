@@ -45,12 +45,14 @@ void Widget::openButtonClicked()
             ui->playButton->setEnabled(true);
             ui->pauseButton->setEnabled(true);
             ui->stopButton->setEnabled(true);
+            ui->recordButton->setEnabled(true);
             ui->progressSlider->setEnabled(true);
         } catch (const runtime_error &e) {
             QMessageBox::critical(this, QString("Error"), e.what());
             ui->playButton->setEnabled(false);
             ui->pauseButton->setEnabled(false);
             ui->stopButton->setEnabled(false);
+            ui->recordButton->setEnabled(false);
             ui->progressSlider->setEnabled(false);
         }
     }
@@ -70,7 +72,9 @@ void Widget::openHRTFButtonClicked()
 
 void Widget::recordButtonClicked()
 {
-
+    QString filename = QFileDialog::getSaveFileName(this, QString("Save WAV File"), QString(), QString("Wave Files (*.wav)"));
+    if (filename != "")
+        p.set_record(filename.toStdString());
 }
 
 void Widget::playButtonClicked()

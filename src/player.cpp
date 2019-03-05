@@ -1,6 +1,7 @@
 #include "player.h"
 #include <cmath>
 #include <stdexcept>
+#include <bassenc.h>
 #include "utils.h"
 using namespace std;
 
@@ -23,6 +24,7 @@ void Player::open(const std::string &filename)
 {
     if (handle != 0)
         BASS_StreamFree(handle);
+    prev.clear();
     handle = BASS_StreamCreateFile(FALSE, filename.c_str(), 0, 0, BASS_SAMPLE_FLOAT);
     if (handle == 0)
         throw runtime_error("file open failed");
@@ -41,7 +43,6 @@ void Player::open_hrtf(const std::string &filename)
 
 void Player::play()
 {
-    prev.clear();
     BASS_ChannelPlay(handle, FALSE);
 }
 
@@ -52,7 +53,9 @@ void Player::pause()
 
 void Player::stop()
 {
+    BASS_Encode_Stop(handle);
     BASS_ChannelStop(handle);
+    prev.clear();
     set_position(0);
 }
 
@@ -82,6 +85,12 @@ void Player::set_position(double pos)
     if (handle == 0)
         return;
     BASS_ChannelSetPosition(handle, BASS_ChannelSeconds2Bytes(handle, pos), BASS_POS_BYTE);
+}
+
+void Player::set_record(const std::string &filename)
+{
+    BASS_Encode_Stop(handle);
+    BASS_Encode_Start(handle, filename.c_str(), BASS_ENCODE_PCM, nullptr, nullptr);
 }
 
 void Player::init()

@@ -27,7 +27,8 @@ FORMS += \
 
 LIBS += \
     -lmysofa \
-    -lbass
+    -lbass \
+    -lbassenc
 
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
