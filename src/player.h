@@ -25,7 +25,7 @@ private:
     static bool inited;
     static void init();
     static void CALLBACK DSP(HDSP, DWORD, void *buffer, DWORD length, void *user);
-    void DSP(short *buffer, DWORD length);
+    void DSP(float *buffer, DWORD length);
 };
 
 #endif // PLAYER_H
