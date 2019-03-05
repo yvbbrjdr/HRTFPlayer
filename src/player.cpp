@@ -1,4 +1,5 @@
 #include "player.h"
+#include <cmath>
 #include <stdexcept>
 #include "utils.h"
 using namespace std;
@@ -90,8 +91,11 @@ void Player::DSP(float *buffer, DWORD length)
         b2.emplace_back(hrtf[i]);
     b1 = FFT_conv(a, b1);
     b2 = FFT_conv(a, b2);
+    double dist = sqrt(double(x * x + y * y + z * z));
+    if (dist < 1.0)
+        dist = 1.0;
     for (DWORD i = 0; i < length; i += 2) {
-        buffer[i] = float(b1[i / 2 + prev.size()]);
-        buffer[i + 1] = float(b2[i / 2 + prev.size()]);
+        buffer[i] = float(b1[i / 2 + prev.size()] / dist);
+        buffer[i + 1] = float(b2[i / 2 + prev.size()] / dist);
     }
 }
