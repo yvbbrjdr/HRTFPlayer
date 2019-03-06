@@ -24,8 +24,8 @@ private:
     };
     SOFA *sofa;
     HSTREAM handle;
-    float x, y, z;
-    std::vector<double> prev;
+    float x, y, z, prev_x, prev_y, prev_z;
+    std::vector<double> prev_data;
     static bool inited;
     static void init();
     static void CALLBACK DSP(HDSP, DWORD, void *buffer, DWORD length, void *user);

@@ -7,7 +7,7 @@ using namespace std;
 
 bool Player::inited = false;
 
-Player::Player() : sofa(nullptr), handle(0), x(1), y(0), z(0)
+Player::Player() : sofa(nullptr), handle(0), x(1), y(0), z(0), prev_x(1), prev_y(0), prev_z(0)
 {
     init();
 }
@@ -24,7 +24,7 @@ void Player::open(const std::string &filename)
 {
     if (handle != 0)
         BASS_StreamFree(handle);
-    prev.clear();
+    prev_data.clear();
     handle = BASS_StreamCreateFile(FALSE, filename.c_str(), 0, 0, BASS_SAMPLE_FLOAT);
     if (handle == 0)
         throw runtime_error("file open failed");
@@ -53,7 +53,7 @@ void Player::stop()
 {
     BASS_Encode_Stop(handle);
     BASS_ChannelStop(handle);
-    prev.clear();
+    prev_data.clear();
     set_position(0);
 }
 
@@ -112,24 +112,43 @@ void Player::DSP(float *buffer, DWORD length)
         return;
     vector<float> hrtf = sofa->get_hrtf(x, y, z);
     size_t prev_size = hrtf.size() / 2 - 1;
-    if (prev.size() != prev_size)
-        prev.resize(prev_size);
-    vector<double> a(prev), b1, b2;
+    if (prev_data.size() != prev_size)
+        prev_data.resize(prev_size);
+    vector<double> a(prev_data), b1, b2;
     for (DWORD i = 0; i < length; i += 2)
         a.emplace_back((buffer[i] + buffer[i + 1]) / 2);
-    for (size_t i = 0; i < prev.size(); ++i)
-        prev[i] = a[a.size() - prev.size() + i];
+    vector<Complex> fa = FFT(a, size_t(pow(2, ceil(log2(a.size())))));
+    for (size_t i = 0; i < prev_data.size(); ++i)
+        prev_data[i] = a[a.size() - prev_data.size() + i];
     for (size_t i = 0; i < hrtf.size() / 2; ++i)
         b1.emplace_back(hrtf[i]);
     for (size_t i = hrtf.size() / 2; i < hrtf.size(); ++i)
         b2.emplace_back(hrtf[i]);
-    b1 = FFT_conv(a, b1);
-    b2 = FFT_conv(a, b2);
+    b1 = FFT_conv2(fa, b1);
+    b2 = FFT_conv2(fa, b2);
+    if (x != prev_x || y != prev_y || z != prev_z) {
+        vector<float> hrtf2 = sofa->get_hrtf(prev_x, prev_y, prev_z);
+        vector<double> c1, c2;
+        for (size_t i = 0; i < hrtf2.size() / 2; ++i)
+            c1.emplace_back(hrtf2[i]);
+        for (size_t i = hrtf2.size() / 2; i < hrtf2.size(); ++i)
+            c2.emplace_back(hrtf2[i]);
+        c1 = FFT_conv2(fa, c1);
+        c2 = FFT_conv2(fa, c2);
+        for (DWORD i = 0; i < length; i += 2) {
+            double t = double(i) / length;
+            b1[i / 2 + prev_data.size()] = t * b1[i / 2 + prev_data.size()] + (1 - t) * c1[i / 2 + prev_data.size()];
+            b2[i / 2 + prev_data.size()] = t * b2[i / 2 + prev_data.size()] + (1 - t) * c2[i / 2 + prev_data.size()];
+        }
+    }
+    prev_x = x;
+    prev_y = y;
+    prev_z = z;
     double dist = sqrt(double(x * x + y * y + z * z));
     if (dist < 1.0)
         dist = 1.0;
     for (DWORD i = 0; i < length; i += 2) {
-        buffer[i] = float(b1[i / 2 + prev.size()] / dist);
-        buffer[i + 1] = float(b2[i / 2 + prev.size()] / dist);
+        buffer[i] = float(b1[i / 2 + prev_data.size()] / dist);
+        buffer[i + 1] = float(b2[i / 2 + prev_data.size()] / dist);
     }
 }

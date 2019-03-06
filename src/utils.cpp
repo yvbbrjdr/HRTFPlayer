@@ -1,23 +1,6 @@
 #include "utils.h"
-#include <complex>
 #include <cmath>
 using namespace std;
-
-typedef complex<double> Complex;
-
-static vector<Complex> FFT(const vector<double> &a, size_t len);
-static vector<double> IFFT(const vector<Complex> &a, size_t len);
-
-vector<double> FFT_conv(const vector<double> &a, const vector<double> &b)
-{
-    size_t ifft_len = max(a.size(), b.size());
-    size_t fft_len = size_t(pow(2, ceil(log2(ifft_len))));
-    vector<Complex> fa = FFT(a, fft_len),
-                    fb = FFT(b, fft_len);
-    for (size_t i = 0; i < fa.size(); ++i)
-        fa[i] *= fb[i];
-    return IFFT(fa, ifft_len);
-}
 
 static vector<Complex> FFT_internal(const vector<Complex> &a, const Complex &omega);
 
@@ -40,6 +23,25 @@ vector<double> IFFT(const vector<Complex> &a, size_t len)
     for (size_t i = 0; i < len; ++i)
         ret.emplace_back(output[i].real() / n);
     return ret;
+}
+
+vector<double> FFT_conv(const vector<double> &a, const vector<double> &b)
+{
+    size_t ifft_len = max(a.size(), b.size());
+    size_t fft_len = size_t(pow(2, ceil(log2(ifft_len))));
+    vector<Complex> fa = FFT(a, fft_len),
+                    fb = FFT(b, fft_len);
+    for (size_t i = 0; i < fa.size(); ++i)
+        fa[i] *= fb[i];
+    return IFFT(fa, ifft_len);
+}
+
+vector<double> FFT_conv2(const vector<Complex> &a, const vector<double> &b)
+{
+    vector<Complex> fb = FFT(b, a.size());
+    for (size_t i = 0; i < fb.size(); ++i)
+        fb[i] *= a[i];
+    return IFFT(fb, a.size());
 }
 
 vector<Complex> FFT_internal(const vector<Complex> &a, const Complex &omega)
