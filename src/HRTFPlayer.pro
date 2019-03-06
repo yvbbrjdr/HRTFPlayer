@@ -14,13 +14,15 @@ SOURCES += \
     widget.cpp \
     utils.cpp \
     sofa.cpp \
-    player.cpp
+    player.cpp \
+    topview.cpp
 
 HEADERS += \
     widget.h \
     utils.h \
     sofa.h \
-    player.h
+    player.h \
+    topview.h
 
 FORMS += \
     widget.ui

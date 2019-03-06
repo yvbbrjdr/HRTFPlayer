@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMouseEvent>
 using namespace std;
 
 Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget), progressSliderTimer(this), rotateTimer(this)
@@ -26,6 +27,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget), progressS
     connect(ui->heightSlider, &QSlider::valueChanged, this, &Widget::heightSliderChanged);
     connect(&this->progressSliderTimer, &QTimer::timeout, this, &Widget::progressSliderTimeout);
     connect(&this->rotateTimer, &QTimer::timeout, this, &Widget::rotateTimeout);
+    connect(ui->topView, &TopView::mouseMoved, this, &Widget::topViewMouseMoved);
     progressSliderTimer.setInterval(100);
     progressSliderTimer.start();
     rotateTimer.setInterval(10);
@@ -107,6 +109,7 @@ void Widget::applyButtonClicked()
     ui->heightSlider->blockSignals(true);
     ui->heightSlider->setValue(int(z * ui->heightSlider->maximum() / 5));
     ui->heightSlider->blockSignals(false);
+    ui->topView->set_source(x, y);
     p.set_source(x, y, z);
 }
 
@@ -157,5 +160,13 @@ void Widget::rotateTimeout()
     theta += M_PI / 500;
     ui->xEdit->setText(QString::number(dist * cos(theta)));
     ui->yEdit->setText(QString::number(dist * sin(theta)));
+    applyButtonClicked();
+}
+
+void Widget::topViewMouseMoved(QMouseEvent *event)
+{
+    QPointF c = ui->topView->mapToScene(event->pos());
+    ui->xEdit->setText(QString::number(-c.y() / 50));
+    ui->yEdit->setText(QString::number(-c.x() / 50));
     applyButtonClicked();
 }

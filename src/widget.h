@@ -33,6 +33,7 @@ private slots:
     void heightSliderChanged();
     void progressSliderTimeout();
     void rotateTimeout();
+    void topViewMouseMoved(QMouseEvent *event);
 };
 
 #endif // WIDGET_H
