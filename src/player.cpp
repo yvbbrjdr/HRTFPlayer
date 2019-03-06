@@ -33,12 +33,10 @@ void Player::open(const std::string &filename)
 
 void Player::open_hrtf(const std::string &filename)
 {
-    if (sofa != nullptr) {
-        SOFA *tmp = sofa;
-        sofa = nullptr;
+    SOFA *tmp = new SOFA(filename, SAMPLE_RATE);
+    swap(sofa, tmp);
+    if (tmp != nullptr)
         delete tmp;
-    }
-    sofa = new SOFA(filename, SAMPLE_RATE);
 }
 
 void Player::play()
