@@ -111,8 +111,9 @@ void Player::DSP(float *buffer, DWORD length)
     if (sofa == nullptr)
         return;
     vector<float> hrtf = sofa->get_hrtf(x, y, z);
-    if (prev.empty())
-        prev.resize(hrtf.size() / 2 - 1);
+    size_t prev_size = hrtf.size() / 2 - 1;
+    if (prev.size() != prev_size)
+        prev.resize(prev_size);
     vector<double> a(prev), b1, b2;
     for (DWORD i = 0; i < length; i += 2)
         a.emplace_back((buffer[i] + buffer[i + 1]) / 2);
