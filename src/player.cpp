@@ -108,7 +108,7 @@ void CALLBACK Player::DSP(HDSP, DWORD, void *buffer, DWORD length, void *user)
 
 void Player::DSP(float *buffer, DWORD length)
 {
-    if (sofa == nullptr)
+    if (sofa == nullptr || (x == 0.0 && y == 0.0 && z == 0.0))
         return;
     vector<float> hrtf = sofa->get_hrtf(x, y, z);
     size_t prev_size = hrtf.size() / 2 - 1;
